@@ -95,7 +95,6 @@ function toHex(n){
     }
     return (result==''?'0':result);
 }
-
 (function($){
     var raphaelPaper;
     var raphaelObjs;
@@ -131,7 +130,7 @@ function toHex(n){
                     ' <code>"chris"</code></p>'
             },
              trigger:function(result){
-                 return result.type == "(Num t) => t" ||
+                 return result.type.match(/^\(?Num [a-z]+\)? => [a-z]+$/) ||
                      result.type == "Integer" ||
                      result.type == "Int";
              }
@@ -146,9 +145,9 @@ function toHex(n){
                     + '<p>Hi there' + htmlEncode(n)
                     + (n!="!"? " That's a pretty name. Honest." : "")
                     + " You're getting the hang of this! </p>" +
-                    "<p><strong>Note:</strong> You can chat to Haskell programmers while learning here, enter <code>chat</code> to start it."+
-                    " You will join the official IRC channel of the Haskell community!</p>"
-                    + "<p>Each time, you're getting back the value of the expression. So "+
+                    // "<p><strong>Note:</strong> You can chat to Haskell programmers while learning here, enter <code>chat</code> to start it."+
+                    // " You will join the official IRC channel of the Haskell community!</p>"
+                    "<p>Each time, you're getting back the value of the expression. So "+
                     "far, just a number and a list of characters.</p>" +
                     "<p>You can have lists of other stuff, too. Let's see your " +
                     " lottery numbers: <code>[42,13,22]</code></p>"
@@ -175,7 +174,7 @@ function toHex(n){
             },
              trigger:function(result){
                  return result.expr.match(/^[ ]*\[[0-9, ]+\][ ]*$/) &&
-                     result.type == "(Num t) => [t]";
+                     result.type.match(/^\(?Num [a-z]+\)? => \[[a-z]+\]$/);
              }
             },
             ////////////////////////////////////////////////////////////////////////
@@ -198,7 +197,7 @@ function toHex(n){
              },
              trigger:function(result){
                  return result.expr.match(/sort/) &&
-                     result.type == "(Num t, Ord t) => [t]";
+                     result.type.match(/\(?Num [a-z]+, Ord [a-z]+\)? => \[[a-z]+\]$/);
              }
             },
             // Tuples
@@ -237,7 +236,7 @@ function toHex(n){
             },
              trigger:function(result){
                  return result.expr.match(/\([0-9]+,[ ]*"[^"]+"\)/) &&
-                     result.type == "(Num t) => (t, [Char])";
+                     result.type.match(/\(?Num [a-z]\)? => \([a-z], \[Char\]\)$/);
              }
             },
             // Summary of lesson 2
@@ -267,7 +266,7 @@ function toHex(n){
             },
              trigger:function(result){
                  return result.expr.match(/fst/) &&
-                     result.type == "(Num t) => t";
+                     result.type.match(/^\(?Num [a-z]\)? => [a-z]$/);
              }
             },
             {guide:function(result){
@@ -291,7 +290,7 @@ function toHex(n){
 
             },trigger:function(result){
                 return result.expr.match(/^[ ]*let[ ]+x[ ]*=[ ]*[0-9]+[ ]*in[ ]*x[ ]*\*[ ]*x/) &&
-                    result.type == "(Num t) => t";
+                    result.type.match(/\(?Num [a-z]\)? => [a-z]$/);
             }
             },
             {guide:function(result){
@@ -304,7 +303,7 @@ function toHex(n){
                     " the meat of Haskell!";
             },trigger:function(result){
                 return result.expr.match(/^[ ]*let[ ]+villain[ ]*=[ ]*\([0-9]+,[ ]*"[^"]+"\)[ ]*in[ ]+fst[ ]+villain[ ]*/) &&
-                    result.type == "(Num t) => t";
+                    result.type.match(/\(?Num [a-z]\)? => [a-z]$/);
             }
             },
             // Lesson 3: Syntactic sugar
@@ -402,7 +401,8 @@ function toHex(n){
              },
              trigger:function(result){
                  return result.expr.match(/^[ ]*map[ ]+\(\+1\)[ ]*\[1..5\][ ]*$/) &&
-                     result.type == "(Num a, Enum a) => [a]";
+                     (result.type.match(/^\(?Num [a-z], Enum [a-z]\)? => \[[a-z]\]$/) ||
+                      result.type.match(/^\(?Enum [a-z], Num [a-z]\)? => \[[a-z]\]$/));
              }},
             {guide:function(result){
                 return "<h3>Lists and Tuples</h3>" +
@@ -421,7 +421,7 @@ function toHex(n){
             },
              trigger:function(result){
                  return result.expr.match(/^[ ]*\(1,"[^"]+"\)[ ]*$/) &&
-                     result.type == "(Num t) => (t, [Char])";
+                     result.type.match(/^\(?Num [a-z]\)? => \([a-z], \[Char\]\)$/);
              }},
             {guide:function(result){
                 return "<h3>Let there be functions</h3>" +
@@ -438,7 +438,7 @@ function toHex(n){
             },
              trigger:function(result){
                  return result.expr.match(/^[ ]*let[ ]*square[ ]+x[ ]*=[ ]*x[ ]*\*[ ]*x[ ]*in[ ]*square[ ]+[0-9]+/) &&
-                     result.type == "(Num t) => t";
+                     result.type.match(/\(?Num [a-z]\)? => [a-z]$/);
              }},
             {guide:function(result){
                 if (!result || !result.value) result = { value: "[1,4,9,16,25,36,49,64,81,100]" };
@@ -465,7 +465,8 @@ function toHex(n){
             },
              trigger:function(result){
                  return result.expr.match(/^[ ]*let[ ]+square[ ]+x[ ]*=[ ]*x[ ]*\*[ ]*x[ ]*in[ ]+map[ ]+square[ ]*\[1..10\][ ]*$/) &&
-                     result.type == "(Num a, Enum a) => [a]";
+                     (result.type.match(/^\(?Num [a-z], Enum [a-z]\)? => \[[a-z]\]$/) ||
+                      result.type.match(/^\(?Enum [a-z], Num [a-z]\)? => \[[a-z]\]$/));
              }},
             {guide:function(result){
                 return "<h3>Exercise time!</h3>" +
@@ -536,7 +537,7 @@ function toHex(n){
              },
              trigger:function(result){
                  return result.expr.match(/^[ ]*let[ ]+\(a,b\)[ ]+=[ ]+\(10,12\)[ ]+in[ ]+a[ ]*\*[ ]*2[ ]*$/) &&
-                     result.type == "(Num t) => t";
+                     result.type.match(/\(?Num [a-z]\)? => [a-z]$/);
              }},
             {guide:function(result){
                 return "<h3>"+rmsg(["Ignorance is bliss","Ignoring values"])+"</h3>" +
@@ -608,7 +609,8 @@ function toHex(n){
 
             },
              trigger:function(result){
-                 return result.type == "(Num t, Num t1, Num t2) => ((t, t1, t2), t, t1, t2)";
+	     console.log(result.type)
+                 return result.type == "(Num t2, Num t1, Num t, Num t3, Num t4, Num t5) =>\n((t3, t4, t5), t, t1, t2)"
              }},
             {lesson:6,
              title:'Types',
@@ -774,7 +776,9 @@ function toHex(n){
                     learnMore
             },
              trigger:function(result){
-                 return result.type == '(Num a, Ord a) => [a]';
+                 return (
+		   result.type.match(/^\(?Num [a-z], Ord [a-z]\)? => \[[a-z]\]$/) ||
+                   result.type.match(/^\(?Ord [a-z], Num [a-z]\)? => \[[a-z]\]$/));
              }}
         ];
 
@@ -1126,9 +1130,10 @@ function toHex(n){
     ////////////////////////////////////////////////////////////////////////
     // Change the tutorial page
 
-    function setTutorialPage(result,n) {
+    function setTutorialPage(result,n) {	
         if (pages[n]) {
             window.location.href = '#' + (1*n + 1);
+            if (false && window.ga_tracker)
             window.ga_tracker._trackPageview('/page' +(1*n + 1));
             tutorialGuide.find('.lesson').remove();
             tutorialGuide.animate({opacity:0,height:0},'fast',function(){
